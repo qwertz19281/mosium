@@ -1,5 +1,5 @@
 use image::guess_format;
-use std::path::PathBuf;
+use std::sync::Arc;
 use std::path::Path;
 use walkdir::WalkDir;
 use std::fs::File;
@@ -18,7 +18,7 @@ pub fn is_image_file(p: &Path) -> bool {
     false
 }
 
-pub fn collect_files(p: impl AsRef<Path>, recurse: bool, follow_links: bool) -> Vec<PathBuf> {
+pub fn collect_files(p: impl AsRef<Path>, recurse: bool, follow_links: bool) -> Vec<Arc<Path>> {
     let mut walker = WalkDir::new(p);
     walker = walker.follow_links(follow_links);
     if !recurse {
@@ -30,6 +30,6 @@ pub fn collect_files(p: impl AsRef<Path>, recurse: bool, follow_links: bool) -> 
         .filter(|(ft,e)| {
             *ft && is_image_file(e.path())
         })
-        .map(|(_,e)| e.into_path() )
+        .map(|(_,e)| e.into_path().into() )
         .collect()
 }

@@ -68,7 +68,7 @@ fn scale_trans(mut inp: RgbaImage, dest: (u32,u32), scale: FilterType) -> RgbaIm
     }
 
     let i = crop(&mut inp, ox as u32, oy as u32, zw as u32, zh as u32);
-    let i = resize(&i, zw as u32, zh as u32, scale);
+    let i = resize(&i, ow as u32, oh as u32, scale);
     i
 }
 

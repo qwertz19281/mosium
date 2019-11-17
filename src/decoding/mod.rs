@@ -5,7 +5,8 @@ use crate::meta::ArcMeta;
 use async_std::task::block_on;
 use async_std::task::spawn;
 use crate::tiles::src_tile::SrcTile;
-use std::path::PathBuf;
+use std::sync::Arc;
+use std::path::Path;
 use crate::comparer::Comparer;
 use crate::util::RefClonable;
 use itertools::Itertools;
@@ -13,11 +14,13 @@ use itertools::Itertools;
 pub mod files;
 pub mod split;
 
-pub async fn decode_and_compare<C: Comparer>(f: PathBuf, m: ArcMeta<C>) -> Result<SrcTile,Box<dyn Error + Send + Sync>> {
+pub async fn decode_and_compare<C: Comparer>(f: Arc<Path>, m: ArcMeta<C>) -> Result<SrcTile,Box<dyn Error + Send + Sync>> {
     println!("\t{}",f.to_string_lossy());
     let mem = read(&*f).await?;
 
     let img = image::load_from_memory(&mem[..])?;
+
+    drop(mem);
 
     let iimg = C::pre_parse(img, m.tile_size, m.scale);
 
@@ -38,6 +41,6 @@ pub async fn decode_and_compare<C: Comparer>(f: PathBuf, m: ArcMeta<C>) -> Resul
     Ok(stile)
 }
 
-pub fn decode_compare_all<C: Comparer + Send + 'static>(p: Vec<PathBuf>, m: ArcMeta<C>) -> Vec<SrcTile> where C::DestImage: Send + Sync {
+pub fn decode_compare_all<C: Comparer + Send + 'static>(p: Vec<Arc<Path>>, m: ArcMeta<C>) -> Vec<SrcTile> where C::DestImage: Send + Sync {
     async_par!(p,m,64,i,a,{ decode_and_compare::<C>(i,a).await })
 }

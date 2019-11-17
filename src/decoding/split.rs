@@ -24,11 +24,11 @@ pub fn split_wall<C: Comparer>(wall: &RgbaImage, crop: bool, (tw,th): (u32,u32),
     let mut tiledata = Vec::with_capacity((tcw*tch) as usize);
     let mut tiles = Vec::with_capacity((tcw*tch) as usize);
 
-    for y in 0..tcw {
-        for x in 0..tch {
+    for y in 0..tch {
+        for x in 0..tcw {
             //absolute offsets plz
-            let ay = (x*tw) as i32;
-            let ax = (y*th) as i32;
+            let ax = (x*tw) as i32;
+            let ay = (y*th) as i32;
 
             let mut tile = RgbaImage::new(tw,th);
             transfer(&mut tile, wall, (tw as i32, th as i32), (ax-ox, ay-oy), (0, 0));

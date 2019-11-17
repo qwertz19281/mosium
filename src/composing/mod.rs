@@ -1,4 +1,7 @@
-use std::path::PathBuf;
+use image::Rgba;
+use std::path::Path;
+use std::collections::HashMap;
+use std::sync::Arc;
 use crate::util::transfer;
 use crate::composing::decode::decode_all;
 use image::RgbaImage;
@@ -12,11 +15,14 @@ use std::fs::read;
 pub mod decode;
 
 pub fn compose_walls<C: Comparer + Send + 'static>(inp: Vec<DestTile>, srcs: Vec<SrcTile>, meta: ArcMeta<C>) -> RgbaImage where C::DestImage: Send + Sync {
-    /*let src_paths = inp.into_iter()
-        .map(|d| srcs[d.linked.unwrap().id].path.clone() )
-        .collect::<Vec<_>>();*/
-    
-    //let tiles = decode_all(src_paths, meta.refc());
+    //this inefficient hashmap vec thing is still faster than processing pixel masses
+    let mut map: HashMap<Arc<Path>,Vec<usize>> = HashMap::with_capacity(inp.len());
+
+    for (i,t) in inp.iter().enumerate() {
+        let path = &srcs[t.linked.as_ref().unwrap().id].path;
+        let entry = map.entry(path.refc());
+        entry.or_default().push(i);
+    }
 
     let (tw,tcw,th,tch) = (meta.tile_size.0, meta.tile_axis.0, meta.tile_size.1, meta.tile_axis.1);
 
@@ -26,19 +32,28 @@ pub fn compose_walls<C: Comparer + Send + 'static>(inp: Vec<DestTile>, srcs: Vec
 
     assert_eq!(tcw*tch, inp.len() as u32);
 
-    for (i,t) in inp.iter().enumerate() {
-        let img = &srcs[t.linked.as_ref().unwrap().id].path;
-        let img = load::<C>(img,&meta);
+    for (path,dests) in map.iter() {
+        let img = load::<C>(path,&meta);
 
-        let ox = (i as u32 % tcw) * tw; 
-        let oy = (i as u32 / tch) * th; 
-        transfer(&mut out, &img, (tw as i32, th as i32 ), (0,0), (ox as i32, oy as i32));
+        for i in dests {
+            //i is the tile index
+            let ox = (*i as u32 % tcw) * tw; 
+            let oy = (*i as u32 / tcw) * th; 
+            transfer(&mut out, &img, (tw as i32, th as i32), (0,0), (ox as i32, oy as i32));
+        }
     }
+
+    /*for i in 0..(tcw*tch) {
+        let ox = (i as u32 % tcw) * tw; 
+        let oy = (i as u32 / tcw) * th;
+
+        out.put_pixel(ox,oy, Rgba([(i%255) as u8,0,0,255]));
+    }*/
 
     out
 }
 
-pub fn load<C: Comparer>(f: &PathBuf, m: &ArcMeta<C>) -> RgbaImage {
+pub fn load<C: Comparer>(f: &Arc<Path>, m: &ArcMeta<C>) -> RgbaImage {
     println!("\t{}",f.to_string_lossy());
     let mem = read(&*f).expect("Image failed to read in second pass sowwy");
 
