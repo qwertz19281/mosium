@@ -18,7 +18,7 @@ impl Comparer for Boring {
         for ((s,sa),(d,da)) in ( tile.0.iter().zip(tile.1.iter()) ) .zip( wall.0.iter().zip(wall.1.iter()) ) {
             //l*a*b* squared distance should be precise enough
             let fdiff = s.squared_distance(d); //max: 30000
-            let amul = *(sa.min(da)) as f32 / 65025.0;
+            let amul = *(sa.min(da)) as f32;// / 65025.0;
             sum += (fdiff*amul) as u64;
         }
 
