@@ -1,12 +1,9 @@
+use std::error::Error;
+use crate::tiles::DestId;
+use async_std::fs::read;
 use crate::meta::ArcMeta;
-use std::path::Path;
-use std::sync::Arc;
 use async_std::task::block_on;
 use async_std::task::spawn;
-use async_std::task::Task;
-use crate::scaler::Scaler;
-use crate::decoding::tiles::decode_and_compare;
-use crate::tiles::dest_tile::DestTile;
 use crate::tiles::src_tile::SrcTile;
 use std::path::PathBuf;
 use crate::comparer::Comparer;
@@ -14,46 +11,33 @@ use crate::util::RefClonable;
 use itertools::Itertools;
 
 pub mod files;
-pub mod tiles;
 pub mod split;
 
-#[macro_use]
-use crate::util::*;
+pub async fn decode_and_compare<C: Comparer>(f: PathBuf, m: ArcMeta<C>) -> Result<SrcTile,Box<dyn Error + Send + Sync>> {
+    println!("\t{}",f.to_string_lossy());
+    let mem = read(&*f).await?;
+
+    let img = image::load_from_memory(&mem[..])?;
+
+    let iimg = C::pre_parse(img, m.tile_size, m.scale);
+
+    let mut compares: Vec<DestId> = m.walls_parsed.iter().enumerate()
+        .map(|(i,t)| DestId{id: i, diff: C::compare(&iimg, t, m.tile_size)} )
+        .collect();
+
+    compares.sort_unstable_by_key(|k| k.diff);
+
+    let stile = SrcTile{
+        path: f,
+        dest_matches: compares,
+        linked: Vec::new(),
+    };
+
+    
+
+    Ok(stile)
+}
 
 pub fn decode_compare_all<C: Comparer + Send + 'static>(p: Vec<PathBuf>, m: ArcMeta<C>) -> Vec<SrcTile> where C::DestImage: Send + Sync {
-    /*let tasks = p.into_iter()
-        .map(|i| {
-            let a = Arc::clone(&tiles);
-            spawn(async{ decode_and_compare::<C,S>(i,a).await })
-        })
-        .collect::<Vec<_>>();
-    //spawn all tasks and then join all, wery constipating and may not very efficient
-    tasks.into_iter()
-        .map(|t| block_on(t) )
-        .filter_map(|t| t.ok() )
-        .collect::<Vec<_>>()*/
-
-    /*let mut out = Vec::with_capacity(p.len());
-
-    //so we always spawn up to 64 tasks concurrently and let the stupid executer in parallel
-    for c in p.into_iter().chunks(64).into_iter() {
-        block_on(async {
-            let tasks = c
-                .map(|i| {
-                    let a = m.refc();
-                    spawn(async{ decode_and_compare::<C>(i,a).await })
-                })
-                .collect::<Vec<_>>();
-
-            for t in tasks {
-                if let Ok(r) = t.await {
-                    out.push(r);
-                }
-            }
-        });
-    }*/
-
-    //out
-
     async_par!(p,m,64,i,a,{ decode_and_compare::<C>(i,a).await })
 }

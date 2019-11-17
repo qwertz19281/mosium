@@ -1,6 +1,5 @@
 use image::FilterType;
 use image::RgbaImage;
-use crate::scaler::Scaler;
 use image::DynamicImage;
 
 pub mod boring;

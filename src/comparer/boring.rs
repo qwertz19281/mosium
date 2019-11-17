@@ -2,9 +2,7 @@ use std::slice::from_raw_parts;
 use lab::Lab;
 use image::RgbaImage;
 use image::DynamicImage;
-use crate::scaler::Scaler;
 use crate::comparer::Comparer;
-use image::GenericImageView;
 use num_rational::Rational64;
 use image::FilterType;
 use image::imageops::{crop,resize};
@@ -14,7 +12,7 @@ pub struct Boring;
 impl Comparer for Boring {
     type DestImage = (Box<[Lab]>,Box<[u8]>);
 
-    fn compare(tile: &Self::DestImage, wall: &Self::DestImage, res: (u32,u32)) -> u64 {
+    fn compare(tile: &Self::DestImage, wall: &Self::DestImage, _res: (u32,u32)) -> u64 {
         let mut sum = 0;
 
         for ((s,sa),(d,da)) in ( tile.0.iter().zip(tile.1.iter()) ) .zip( wall.0.iter().zip(wall.1.iter()) ) {

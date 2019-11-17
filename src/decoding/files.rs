@@ -1,5 +1,4 @@
 use image::guess_format;
-use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::path::Path;
 use walkdir::WalkDir;

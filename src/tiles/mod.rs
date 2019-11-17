@@ -13,6 +13,3 @@ pub struct DestId {
     pub diff: u64,
     pub id: usize,
 }
-
-pub type SrcTiles = Vec<SrcTile>;
-pub type DestTiles = Vec<DestTile>;
