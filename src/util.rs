@@ -11,7 +11,7 @@ impl<T> RefClonable for Arc<T> where T: ?Sized {
     }
 }
 ///transfer a rectange at the given bounds from src to dest
-#[inline]
+#[inline(always)]
 pub fn transfer(dest: &mut RgbaImage, src: &RgbaImage, size: (i32,i32), pos_src: (i32,i32), pos_dest: (i32,i32))  {
     let (w,h) = size;
     let (sox,soy) = pos_src;
