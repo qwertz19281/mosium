@@ -9,7 +9,7 @@ use crate::decoding::split::split_wall;
 use std::fs::read;
 use std::sync::Arc;
 use std::path::PathBuf;
-use image::FilterType;
+use image::imageops::FilterType;
 use crate::util::RefClonable;
 use crate::puzzler::simplemal::SimpleMal;
 use crate::puzzler::Puzzler;
@@ -133,5 +133,5 @@ pub fn run(overwrite: bool, tile_size: (u32,u32), recurse: bool, input: PathBuf,
 
     println!("Write compose ");
 
-    composed.save_with_format(output, ImageFormat::PNG).expect("Failed to write output image");
+    composed.save_with_format(output, ImageFormat::Png).expect("Failed to write output image");
 }

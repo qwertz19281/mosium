@@ -7,11 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-walkdir = "2.2"
-image = "0.22"
-async-std = "1.0"
+walkdir = "2"
+image = "0.23"
+async-std = "1"
 itertools = "0.8"
 num-rational = "0.2"
-lab = "0.7"
-rayon = "1.2"
-clap = "2.33"
+lab = "0"
+rayon = "1"
+clap = "2"

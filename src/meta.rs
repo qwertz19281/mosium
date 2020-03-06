@@ -2,7 +2,7 @@ use crate::tiles::src_tile::SrcTile;
 use crate::tiles::dest_tile::DestTile;
 use std::sync::Arc;
 use crate::comparer::Comparer;
-use image::FilterType;
+use image::imageops::FilterType;
 
 pub struct Meta<C: Comparer> {
     pub scale: FilterType,

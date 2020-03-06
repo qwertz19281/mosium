@@ -1,4 +1,4 @@
-use image::FilterType;
+use image::imageops::FilterType;
 use image::RgbaImage;
 use image::DynamicImage;
 

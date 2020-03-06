@@ -4,8 +4,7 @@ use image::RgbaImage;
 use image::DynamicImage;
 use crate::comparer::Comparer;
 use num_rational::Rational64;
-use image::FilterType;
-use image::imageops::{crop,resize};
+use image::imageops::{FilterType,crop,resize};
 
 pub struct Boring;
 

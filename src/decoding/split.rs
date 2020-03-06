@@ -1,4 +1,4 @@
-use image::FilterType;
+use image::imageops::FilterType;
 use crate::comparer::Comparer;
 use crate::tiles::dest_tile::DestTile;
 use crate::util::transfer;
