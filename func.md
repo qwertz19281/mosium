@@ -13,14 +13,14 @@
                 - inner touch crop, but pan pixel for pixel on src and pick the    one with the highest match
             - else just use the preferred color diff algorithm to compare
         - store
-- ### Create Data for preferred puzzler algorithm
+- ### Create Data for preferred mapper algorithm
     - Every Src Tile
         - Sorted Vec with id of best dest tiles
         - vec of connected dest id's (empty at begin)
     - Every Dest Tile
         - Sorted Vec with id of best src tiles
         - option with connected src id (none at begin)
-- ### Run the puzzler algorithm 
+- ### Run the mapper algorithm 
 - ### Composite the result
 
 Estimated Mem Footprint of puzzle data

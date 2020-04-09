@@ -9,7 +9,7 @@ use std::sync::Arc;
 use std::path::PathBuf;
 use image::imageops::FilterType;
 use crate::util::RefClonable;
-use crate::puzzler::*;
+use crate::mapping::*;
 use image::ImageFormat;
 
 #[macro_use]
@@ -22,7 +22,7 @@ pub mod decoding;
 pub mod comparer;
 pub mod scaler;
 
-pub mod puzzler;
+pub mod mapping;
 
 pub mod composing;
 
@@ -33,7 +33,7 @@ fn main() {
     let matches = clap_app!(mosion =>
         (version: "0.2")
         (about: "Mosaic Image Generator")
-        (@arg NORECURSE: -nr "No recursing in input dir")
+        (@arg NORECURSE: -nr "No recursing in tile dir")
         (@arg OVERWRITE: -y "Allow overwriting output file")
         (@arg NOLABCACHE: --no_lab_cache "Disable caching of converted wall. Reduces memory usage, severely hurts performance")
         (@arg TILEW: -j +takes_value "Tile Width (default=64)")
@@ -71,14 +71,14 @@ fn main() {
         assert!(!output.exists(),"Error: Output exists");
     }
 
-    let puzzler = matches.value_of("MAPPER").unwrap_or("alltoall");
+    let mapping = matches.value_of("MAPPER").unwrap_or("alltoall");
 
-    assert!(valid_puzzler(puzzler),"Error: invalid mapper {}",puzzler);
+    assert!(valid_mapping(mapping),"Error: invalid mapper {}",mapping);
 
-    run((tw,th), cscale, recurse, input, dir, output, puzzler, nolabcache, achunks);
+    run((tw,th), cscale, recurse, input, dir, output, mapping, nolabcache, achunks);
 }
 
-pub fn run(tile_size: (u32,u32), cscale: u32, recurse: bool, input: PathBuf, tile_dir: PathBuf, output: PathBuf, puzzler: &str, nolabcache: bool, achunks: usize) {
+pub fn run(tile_size: (u32,u32), cscale: u32, recurse: bool, input: PathBuf, tile_dir: PathBuf, output: PathBuf, mapping: &str, nolabcache: bool, achunks: usize) {
     println!("Start finding tile images");
     let tile_files = std::thread::spawn(move || {
         collect_files(tile_dir,recurse,false)
@@ -132,7 +132,7 @@ pub fn run(tile_size: (u32,u32), cscale: u32, recurse: bool, input: PathBuf, til
 
     let mut walls_link = vec![None;walls];
 
-    puzzle_with(puzzler, matches, &mut walls_link, tile_files.len(),0).unwrap();
+    puzzle_with(mapping, matches, &mut walls_link, tile_files.len(),0).unwrap();
 
     println!("Compose mosaic image");
 
