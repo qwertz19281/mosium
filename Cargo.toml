@@ -10,8 +10,13 @@ edition = "2018"
 walkdir = "2"
 image = "0.23"
 async-std = "1"
-itertools = "0.8"
+itertools = "0.9"
 num-rational = "0.2"
 lab = "0"
 rayon = "1"
 clap = "2"
+rand = "0.7"
+
+[profile.release]
+lto = true
+codegen-units = 1

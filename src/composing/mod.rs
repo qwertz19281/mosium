@@ -1,7 +1,7 @@
 use image::Rgba;
 use std::path::Path;
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::sync::{RwLock, Arc};
 use crate::util::transfer;
 use crate::composing::decode::decode_all;
 use image::RgbaImage;
@@ -11,6 +11,8 @@ use crate::comparer::Comparer;
 use crate::meta::ArcMeta;
 use crate::util::RefClonable;
 use std::fs::read;
+use rayon::iter::IntoParallelRefIterator;
+use rayon::iter::ParallelIterator;
 
 pub mod decode;
 
@@ -32,16 +34,21 @@ pub fn compose_walls<C: Comparer + Send + 'static>(inp: Vec<DestTile>, srcs: Vec
 
     assert_eq!(tcw*tch, inp.len() as u32);
 
-    for (path,dests) in map.iter() {
-        let img = load::<C>(path,&meta);
+    {
+        let out = RwLock::new(&mut out);
 
-        for i in dests {
-            //i is the tile index
-            let ox = (*i as u32 % tcw) * tw; 
-            let oy = (*i as u32 / tcw) * th; 
-            transfer(&mut out, &img, (tw as i32, th as i32), (0,0), (ox as i32, oy as i32));
-        }
-    }
+        map.par_iter().for_each(|(path,dests)| {
+            let img = load::<C>(path,&meta);
+            let mut out = out.write().unwrap();
+
+            for i in dests {
+                //i is the tile index
+                let ox = (*i as u32 % tcw) * tw; 
+                let oy = (*i as u32 / tcw) * th; 
+                transfer(&mut **out, &img, (tw as i32, th as i32), (0,0), (ox as i32, oy as i32));
+            }
+        });
+    };
 
     /*for i in 0..(tcw*tch) {
         let ox = (i as u32 % tcw) * tw; 

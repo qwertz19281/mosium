@@ -12,17 +12,27 @@ impl Comparer for Boring {
     type DestImage = (Box<[Lab]>,Box<[u8]>);
 
     fn compare(tile: &Self::DestImage, wall: &Self::DestImage, _res: (u32,u32)) -> u64 {
-        let mut sum = 0;
+        let mut sum: u64 = 0;
 
         for ((s,sa),(d,da)) in ( tile.0.iter().zip(tile.1.iter()) ) .zip( wall.0.iter().zip(wall.1.iter()) ) {
             //l*a*b* squared distance should be precise enough
             let fdiff = s.squared_distance(d); //max: 30000
+
+            //let fdiff = ( s.l.max(d.l) - s.l.min(d.l) ) + ( s.a.max(d.a) - s.a.min(d.a) ) + ( s.b.max(d.b) - s.b.min(d.b) );
+
             let amul = *(sa.min(da)) as f32;// / 65025.0;
             sum += (fdiff*amul) as u64;
+            //sum=sum.checked_add(((fdiff*amul)*(fdiff*amul)) as u64).unwrap();
         }
 
         sum
     }
+    /*let fdiff = s.squared_distance(d); //max: 30000
+
+            //let fdiff = ( s.l.max(d.l) - s.l.min(d.l) ) + ( s.a.max(d.a) - s.a.min(d.a) ) + ( s.b.max(d.b) - s.b.min(d.b) );
+
+            let amul = *(sa.min(da)) as f32 * 65025.0;//65025.0;
+            sum = sum.max((fdiff*amul) as u64);*/
 
     fn pre_parse(i: DynamicImage, dest: (u32,u32), scale: FilterType) -> Self::DestImage {
         let i = Self::pre_parse2(i, dest, scale);

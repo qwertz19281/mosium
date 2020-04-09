@@ -14,6 +14,7 @@ use crate::util::RefClonable;
 use crate::puzzler::simplemal::SimpleMal;
 use crate::puzzler::Puzzler;
 use image::ImageFormat;
+use puzzler::alltoall::AllToAll;
 
 #[macro_use]
 pub mod util;
@@ -119,7 +120,8 @@ pub fn run(overwrite: bool, tile_size: (u32,u32), recurse: bool, input: PathBuf,
 
     println!("Find optimal matches");
 
-    SimpleMal::puzzle(&mut meta_ref.walls, &mut meta_ref.src_tiles);
+    //SimpleMal::puzzle(&mut meta_ref.walls, &mut meta_ref.src_tiles);
+    AllToAll::puzzle(&mut meta_ref.walls, &mut meta_ref.src_tiles);
 
     println!("Compose mosaic image");
 
