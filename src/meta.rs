@@ -1,12 +1,13 @@
 use std::{sync::Arc};
-use crate::{comparer::Comparer};
+use crate::{comparer::{TileParsable, Comparer}};
 use image::imageops::FilterType;
 
 pub struct Meta<C: Comparer> {
     pub scale: FilterType,
     pub tile_size: (u32,u32),
     pub tile_axis: (u32,u32),
-    pub walls_parsed: Vec<C::DestImage>,
+    pub walls_parsed: Vec<TileParsable<C>>,
+    pub achunks: usize,
 }
 
 pub type ArcMeta<C: Comparer> = Arc<Meta<C>>;

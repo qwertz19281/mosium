@@ -33,12 +33,15 @@ fn main() {
     let matches = clap_app!(mosion =>
         (version: "0.2")
         (about: "Mosaic Image Generator")
-        (@arg NORECURSE: -nr +takes_value "No recursing in input dir")
-        (@arg OVERWRITE: -y +takes_value "Allow overwriting output file")
+        (@arg NORECURSE: -nr "No recursing in input dir")
+        (@arg OVERWRITE: -y "Allow overwriting output file")
+        (@arg NOLABCACHE: --no_lab_cache "Disable caching of converted wall. Reduces memory usage, severely hurts performance")
         (@arg TILEW: -j +takes_value "Tile Width (default=64)")
         (@arg TILEH: -k +takes_value "Tile Height (default=64)")
         (@arg CSCALE: -s +takes_value "Compose Scale Factor (default=1)")
+        (@arg ACHUNKS: -p +takes_value "Analysis concurrency (increases I/O utilization) (default=64)")
         (@arg MAPPER: -m +takes_value "Mapping Algorithm (simple/alltoall) (default=alltoall)")
+        
         (@arg INPUT: +required "Input \"Wall\" Image")
         (@arg DIR: +required "Tile Image Dir")
         (@arg OUTPUT: +required "Output Image")
@@ -46,10 +49,12 @@ fn main() {
 
     let recurse = !matches.is_present("NORECURSE");
     let overwrite = !matches.is_present("OVERWRITE");
-    
+    let nolabcache = matches.is_present("NOLABCACHE");
+
     let tw: u32 = matches.value_of("TILEW").unwrap_or("64").parse().expect("Error: non-number at -tw");
     let th: u32 = matches.value_of("TILEH").unwrap_or("64").parse().expect("Error: non-number at -th");
     let cscale: u32 = matches.value_of("CSCALE").unwrap_or("1").parse().expect("Error: non-number at -s");
+    let achunks: usize = matches.value_of("ACHUNKS").unwrap_or("1").parse().expect("Error: non-number at -p");
 
     let input = matches.value_of("INPUT").expect("Error: Input not set");
     let dir = matches.value_of("DIR").expect("Error: Tile Dir not set");
@@ -70,10 +75,10 @@ fn main() {
 
     assert!(valid_puzzler(puzzler),"Error: invalid mapper {}",puzzler);
 
-    run((tw,th), cscale, recurse, input, dir, output, puzzler);
+    run((tw,th), cscale, recurse, input, dir, output, puzzler, nolabcache, achunks);
 }
 
-pub fn run(tile_size: (u32,u32), cscale: u32, recurse: bool, input: PathBuf, tile_dir: PathBuf, output: PathBuf, puzzler: &str) {
+pub fn run(tile_size: (u32,u32), cscale: u32, recurse: bool, input: PathBuf, tile_dir: PathBuf, output: PathBuf, puzzler: &str, nolabcache: bool, achunks: usize) {
     println!("Start finding tile images");
     let tile_files = std::thread::spawn(move || {
         collect_files(tile_dir,recurse,false)
@@ -89,7 +94,7 @@ pub fn run(tile_size: (u32,u32), cscale: u32, recurse: bool, input: PathBuf, til
 
     println!("Split Image in tiles");
 
-    let (mut walls_parsed,tile_axis) = split_wall::<Boring>(in_image, false, tile_size, FilterType::Triangle);
+    let (mut walls_parsed,tile_axis) = split_wall::<Boring>(in_image, false, tile_size, FilterType::Triangle, !nolabcache);
     walls_parsed.shrink_to_fit();
 
     print!("Wait for tile search... ");
@@ -106,6 +111,7 @@ pub fn run(tile_size: (u32,u32), cscale: u32, recurse: bool, input: PathBuf, til
         tile_size,
         tile_axis,
         walls_parsed,
+        achunks,
     });
 
     println!("Decode and compare tiles");

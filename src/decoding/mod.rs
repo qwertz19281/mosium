@@ -20,12 +20,14 @@ pub async fn decode_and_compare<C: Comparer>(f: Arc<Path>, m: ArcMeta<C>, tile_i
 
     drop(mem);
 
-    let iimg = C::pre_parse(img, m.tile_size, m.scale);
+    let iimg = C::pre_parse(&img, m.tile_size, m.scale);
+
+    drop(img);
 
     let mut dest = Vec::with_capacity(m.walls_parsed.len());
 
     for (i,w) in m.walls_parsed.iter().enumerate() {
-        let diff = C::compare(&iimg, w, m.tile_size);
+        let diff = C::compare(&iimg, w.parse(m.tile_size,m.scale).as_ref(), m.tile_size);
         dest.push(Match{wall: i as u32, tile: tile_id, diff});
     }
 
@@ -33,5 +35,5 @@ pub async fn decode_and_compare<C: Comparer>(f: Arc<Path>, m: ArcMeta<C>, tile_i
 }
 
 pub fn decode_compare_all<C: Comparer + Send + 'static>(p: Vec<Arc<Path>>, m: ArcMeta<C>) -> Vec<Match> where C::DestImage: Send + Sync {
-    async_par!(p,m,64,f,a,i,{ decode_and_compare::<C>(f,a,i as u32).await })
+    async_par!(p,m,m.achunks,f,a,i,{ decode_and_compare::<C>(f,a,i as u32).await })
 }

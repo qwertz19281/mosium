@@ -26,7 +26,7 @@ impl Comparer for Boring {
         sum
     }
 
-    fn pre_parse(i: DynamicImage, dest: (u32,u32), scale: FilterType) -> Self::DestImage {
+    fn pre_parse(i: &DynamicImage, dest: (u32,u32), scale: FilterType) -> Self::DestImage {
         let i = Self::pre_parse2(i, dest, scale);
 
         let ac: Vec<u8> = i.pixels().map(|p| p[3] ).collect();
@@ -34,7 +34,7 @@ impl Comparer for Boring {
         (image_to_lab(&i),ac.into_boxed_slice())
     }
 
-    fn pre_parse2(i: DynamicImage, dest: (u32,u32), scale: FilterType) -> RgbaImage {
+    fn pre_parse2(i: &DynamicImage, dest: (u32,u32), scale: FilterType) -> RgbaImage {
         let mut i = i.to_rgba();
         if (i.width(),i.height()) != dest {
             i = scale_trans(i, dest, scale);

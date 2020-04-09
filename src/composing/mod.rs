@@ -55,7 +55,7 @@ pub fn load<C: Comparer>(f: &Arc<Path>, cscale: u32, m: &ArcMeta<C>) -> RgbaImag
 
     drop(mem);
 
-    let iimg = C::pre_parse2(img, (m.tile_size.0*cscale,m.tile_size.1*cscale), m.scale);
+    let iimg = C::pre_parse2(&img, (m.tile_size.0*cscale,m.tile_size.1*cscale), m.scale);
 
     iimg
 }
