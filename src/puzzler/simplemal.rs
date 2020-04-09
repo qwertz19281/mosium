@@ -1,7 +1,4 @@
 use super::*;
-use crate::tiles::DestId;
-use crate::tiles::src_tile::SrcTile;
-use crate::tiles::dest_tile::DestTile;
 use rand::RngCore;
 
 pub struct SimpleMal;

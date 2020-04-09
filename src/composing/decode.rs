@@ -11,9 +11,9 @@ use crate::util::RefClonable;
 
 pub async fn decode<C: Comparer>(f: Arc<Path>, m: ArcMeta<C>) -> Result<RgbaImage,()> {
     println!("\t{}",f.to_string_lossy());
-    let mem = read(&*f).await.expect("Image failed to read in second pass sowwy");
+    let mem = read(&*f).await.expect("Failed to read Image file");
 
-    let img = image::load_from_memory(&mem[..]).expect("Image suddenly broken is second pass sowwy");
+    let img = image::load_from_memory(&mem[..]).expect("Failed to decode Image file");
 
     drop(mem);
 

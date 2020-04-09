@@ -1,6 +1,5 @@
 use image::imageops::FilterType;
 use crate::comparer::Comparer;
-use crate::tiles::dest_tile::DestTile;
 use crate::util::transfer;
 use image::RgbaImage;
 use num_rational::Ratio;

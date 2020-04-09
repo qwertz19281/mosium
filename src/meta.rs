@@ -1,7 +1,5 @@
-use crate::tiles::src_tile::SrcTile;
-use crate::tiles::dest_tile::DestTile;
-use std::{path::Path, sync::Arc};
-use crate::{puzzler::Match, comparer::Comparer};
+use std::{sync::Arc};
+use crate::{comparer::Comparer};
 use image::imageops::FilterType;
 
 pub struct Meta<C: Comparer> {
@@ -12,3 +10,10 @@ pub struct Meta<C: Comparer> {
 }
 
 pub type ArcMeta<C: Comparer> = Arc<Meta<C>>;
+
+#[derive(Clone,Copy)]
+pub struct Match {
+    pub tile: u32,
+    pub wall: u32,
+    pub diff: u64,
+}

@@ -5,7 +5,7 @@ use walkdir::WalkDir;
 use std::fs::File;
 use std::io::Read;
 
-///check if the file is a image by trying to read and guess a sector
+/// check if the file is a image by trying to read and guess a sector
 pub fn is_image_file(p: &Path) -> bool {
     if let Ok(mut f) = File::open(p) {
         let mut header = vec![0;512];

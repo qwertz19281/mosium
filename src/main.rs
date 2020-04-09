@@ -18,14 +18,11 @@ pub mod util;
 pub mod meta;
 
 pub mod decoding;
-pub mod tiles;
 
-pub mod opts;
 pub mod comparer;
 pub mod scaler;
 
 pub mod puzzler;
-pub mod puzzling;
 
 pub mod composing;
 
@@ -135,7 +132,7 @@ pub fn run(tile_size: (u32,u32), cscale: u32, recurse: bool, input: PathBuf, til
 
     let composed = compose_walls::<Boring>(&walls_link, &tile_files, cscale, meta.refc());
 
-    println!("Write compose");
+    println!("Write composed");
 
     composed.save_with_format(output, ImageFormat::Png).expect("Failed to write output image");
 }
