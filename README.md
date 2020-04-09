@@ -46,9 +46,9 @@ mosion -s 2 input.jpg tiles mosaic.png # generate 2x size
 
 ## Tile Size
 
-The parameters -j and -k define the size of an tile inside the input image (excluding scale factor).  
+The parameters `-j` and `-k` define the size of an tile inside the input image (excluding scale factor).  
 
--s can define a scale factor applied to the generated mosaic.  
+`-s` can define a scale factor applied to the generated mosaic.  
 Using this is recommended over just upscaling the input image as the analysis can be done in lower resolution and so faster.
 
 ## Mapping Algorithms
@@ -56,15 +56,16 @@ Using this is recommended over just upscaling the input image as the analysis ca
 ### Simple
 
 - just maps the best matching tile to any field
+- best recreation
+- result won't look really random
 
 ### AllToAll
 
-- tries to use as many of the input 
-- slightly worse regeneration compared to Simple
+- tries to use as many of the tile images as possible
 
 ## Tile Comparison
 
-is currently implemented by comparing the source tile against all destination tiles pixel-by-pixel in lab colorspace. This is not very performant, but can allow very precise choices in tiles.
+is currently implemented by comparing the source tile against all destination tiles pixel-by-pixel by CIELAB square color distance. This is not very performant, but can allow very precise choices in tiles.
 
 ## Memory Consumption
 
@@ -72,8 +73,8 @@ Mosion can comsume up to a few gigabytes of memory.
 
 Tips to cut memory usage
 
-- Use -s whenever possible
-- As last resort --no_lab_cache can be used. will negatively affecto performance
+- Use `-s` whenever possible
+- As last resort `--no_lab_cache` can be used. will negatively affect performance
 
 ## TODO
 
