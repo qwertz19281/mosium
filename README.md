@@ -78,5 +78,5 @@ Tips to cut memory usage
 
 ## TODO
 
-- [x] re-implement noise (to increase randomness of tiles)
-- [x] implement any kind of disk caching of comparision data
+- [ ] re-implement noise (to increase randomness of tiles)
+- [ ] implement any kind of disk caching of comparision data
