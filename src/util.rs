@@ -38,22 +38,22 @@ pub fn transfer(dest: &mut RgbaImage, src: &RgbaImage, size: (i32,i32), pos_src:
 /// args: input vec, meta arc, #parallel, refname for input, refname for mety, async code block accessing refname'd vars
 #[macro_export]
 macro_rules! async_par {
-    ($inp:ident,$meta:ident,$par:expr,$inp_ref:ident,$meta_ref:ident,$f:block) => {{
-        let mut out = Vec::with_capacity($inp.len());
+    ($inp:ident,$meta:ident,$par:expr,$inp_ref:ident,$meta_ref:ident,$idx_ref:ident,$f:block) => {{
+        let mut out = Vec::with_capacity($inp.len()*$meta.walls_parsed.len());
 
         //so we always spawn up to 64 tasks concurrently and let the stupid executer in parallel
-        for c in $inp.into_iter().chunks($par).into_iter() {
+        for c in $inp.into_iter().enumerate().chunks($par).into_iter() {
             block_on(async {
                 let tasks = c
-                    .map(|$inp_ref| {
+                    .map(|($idx_ref,$inp_ref)| {
                         let $meta_ref = $meta.refc();
-                        spawn(async{ $f })
+                        spawn(async move { $f })
                     })
                     .collect::<Vec<_>>();
 
                 for t in tasks {
                     if let Ok(r) = t.await {
-                        out.push(r);
+                        out.extend_from_slice(&r);
                     }
                 }
             });

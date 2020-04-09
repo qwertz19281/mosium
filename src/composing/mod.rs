@@ -3,7 +3,6 @@ use std::path::Path;
 use std::collections::HashMap;
 use std::sync::{RwLock, Arc};
 use crate::util::transfer;
-use crate::composing::decode::decode_all;
 use image::RgbaImage;
 use crate::tiles::src_tile::SrcTile;
 use crate::tiles::dest_tile::DestTile;
@@ -14,31 +13,31 @@ use std::fs::read;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
 
-pub mod decode;
+//pub mod decode;
 
-pub fn compose_walls<C: Comparer + Send + 'static>(inp: Vec<DestTile>, srcs: Vec<SrcTile>, meta: ArcMeta<C>) -> RgbaImage where C::DestImage: Send + Sync {
+pub fn compose_walls<C: Comparer + Send + 'static>(mappings: &[Option<u32>], tile_files: &[Arc<Path>], cscale: u32, meta: ArcMeta<C>) -> RgbaImage where C::DestImage: Send + Sync {
     //this inefficient hashmap vec thing is still faster than processing pixel masses
-    let mut map: HashMap<Arc<Path>,Vec<usize>> = HashMap::with_capacity(inp.len());
+    let mut map: HashMap<Arc<Path>,Vec<usize>> = HashMap::with_capacity(mappings.len());
 
-    for (i,t) in inp.iter().enumerate() {
-        let path = &srcs[t.linked.as_ref().unwrap().id].path;
+    for (i,t) in mappings.iter().enumerate() {
+        let path = &tile_files[t.unwrap() as usize];
         let entry = map.entry(path.refc());
         entry.or_default().push(i);
     }
 
-    let (tw,tcw,th,tch) = (meta.tile_size.0, meta.tile_axis.0, meta.tile_size.1, meta.tile_axis.1);
+    let (tw,tcw,th,tch) = (meta.tile_size.0*cscale, meta.tile_axis.0, meta.tile_size.1*cscale, meta.tile_axis.1);
 
     let mut out = RgbaImage::new(tw*tcw, th*tch);
 
     dbg!(tw,tcw,th,tch);
 
-    assert_eq!(tcw*tch, inp.len() as u32);
+    assert_eq!(tcw*tch, mappings.len() as u32);
 
     {
         let out = RwLock::new(&mut out);
 
         map.par_iter().for_each(|(path,dests)| {
-            let img = load::<C>(path,&meta);
+            let img = load::<C>(path,cscale,&meta);
             let mut out = out.write().unwrap();
 
             for i in dests {
@@ -60,13 +59,15 @@ pub fn compose_walls<C: Comparer + Send + 'static>(inp: Vec<DestTile>, srcs: Vec
     out
 }
 
-pub fn load<C: Comparer>(f: &Arc<Path>, m: &ArcMeta<C>) -> RgbaImage {
+pub fn load<C: Comparer>(f: &Arc<Path>, cscale: u32, m: &ArcMeta<C>) -> RgbaImage {
     println!("\t{}",f.to_string_lossy());
     let mem = read(&*f).expect("Image failed to read in second pass sowwy");
 
     let img = image::load_from_memory(&mem[..]).expect("Image suddenly broken is second pass sowwy");
 
-    let iimg = C::pre_parse2(img, m.tile_size, m.scale);
+    drop(mem);
+
+    let iimg = C::pre_parse2(img, (m.tile_size.0*cscale,m.tile_size.1*cscale), m.scale);
 
     iimg
 }

@@ -15,11 +15,9 @@ pub async fn decode<C: Comparer>(f: Arc<Path>, m: ArcMeta<C>) -> Result<RgbaImag
 
     let img = image::load_from_memory(&mem[..]).expect("Image suddenly broken is second pass sowwy");
 
+    drop(mem);
+
     let iimg = C::pre_parse2(img, m.tile_size, m.scale);
 
     Ok(iimg)
-}
-
-pub fn decode_all<C: Comparer + Send + 'static>(p: Vec<Arc<Path>>, m: ArcMeta<C>) -> Vec<RgbaImage> where C::DestImage: Send + Sync {
-    async_par!(p,m,64,i,a,{ decode::<C>(i,a).await })
 }

@@ -1,18 +1,17 @@
+use super::*;
 use crate::tiles::DestId;
 use crate::tiles::src_tile::SrcTile;
 use crate::tiles::dest_tile::DestTile;
-use crate::puzzler::Puzzler;
+use rand::RngCore;
 
 pub struct SimpleMal;
 
 impl Puzzler for SimpleMal {
-    fn puzzle(wall: &mut Vec<DestTile>, tile: &mut Vec<SrcTile>) {
-        for (i,dest_tile) in wall.iter_mut().enumerate() {
-            let matching = &dest_tile.src_matches[0];
-
-            dest_tile.linked = Some(matching.clone());
-
-            tile[matching.id].linked.push(DestId{id: i, diff: matching.diff});
+    fn puzzle(mut matches: Vec<Match>, wall: &mut [Option<u32>], tiles: usize, noise: usize) {
+        for t in matches.iter_mut() {
+            if wall[t.wall as usize].is_none() {
+                wall[t.wall as usize] = Some(t.tile);
+            }
         }
     }
 }
