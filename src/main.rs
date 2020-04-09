@@ -6,7 +6,7 @@ use crate::comparer::boring::Boring;
 use crate::decoding::split::split_wall;
 use std::fs::read;
 use std::sync::Arc;
-use std::path::PathBuf;
+use std::{io::Write, path::PathBuf};
 use image::imageops::FilterType;
 use crate::util::RefClonable;
 use crate::mapping::*;
@@ -54,7 +54,7 @@ fn main() {
     let tw: u32 = matches.value_of("TILEW").unwrap_or("64").parse().expect("Error: non-number at -tw");
     let th: u32 = matches.value_of("TILEH").unwrap_or("64").parse().expect("Error: non-number at -th");
     let cscale: u32 = matches.value_of("CSCALE").unwrap_or("1").parse().expect("Error: non-number at -s");
-    let achunks: usize = matches.value_of("ACHUNKS").unwrap_or("1").parse().expect("Error: non-number at -p");
+    let achunks: usize = matches.value_of("ACHUNKS").unwrap_or("64").parse().expect("Error: non-number at -p");
 
     let input = matches.value_of("INPUT").expect("Error: Input not set");
     let dir = matches.value_of("DIR").expect("Error: Tile Dir not set");
@@ -98,6 +98,7 @@ pub fn run(tile_size: (u32,u32), cscale: u32, recurse: bool, input: PathBuf, til
     walls_parsed.shrink_to_fit();
 
     print!("Wait for tile search... ");
+    std::io::stdout().flush().unwrap();
 
     let mut tile_files = tile_files.join().expect("Tile image find thread crashed");
     tile_files.shrink_to_fit();
