@@ -89,7 +89,7 @@ pub fn run(tile_size: (u32,u32), cscale: u32, recurse: bool, input: PathBuf, til
     let in_image_0 = read(input).expect("Failed to read input image");
     let in_image_1 = image::load_from_memory(&in_image_0).expect("Failed to decode input image");
     drop(in_image_0);
-    let in_image = in_image_1.to_rgba();
+    let in_image = in_image_1.to_rgba8();
     drop(in_image_1);
 
     println!("Split Image in tiles");

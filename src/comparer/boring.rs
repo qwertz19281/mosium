@@ -35,7 +35,7 @@ impl Comparer for Boring {
     }
 
     fn pre_parse2(i: &DynamicImage, dest: (u32,u32), scale: FilterType) -> RgbaImage {
-        let mut i = i.to_rgba();
+        let mut i = i.to_rgba8(); //TODO suppoer 16bit
         if (i.width(),i.height()) != dest {
             i = scale_trans(i, dest, scale);
         }
@@ -78,11 +78,7 @@ fn image_to_lab(i: &RgbaImage) -> Box<[Lab]>{
 
     let ip = unsafe { from_raw_parts(ptr as *const [u8;3], (*i).len()/3) };
 
-    let labbed = if is_x86_feature_detected!("avx") && is_x86_feature_detected!("sse4.1") {
-        lab::simd::rgbs_to_labs(ip)
-    } else {
-        lab::rgbs_to_labs(ip)
-    };
+    let labbed = lab::rgbs_to_labs(ip);
 
     labbed.into_boxed_slice()
 }

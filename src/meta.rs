@@ -10,7 +10,7 @@ pub struct Meta<C: Comparer> {
     pub achunks: usize,
 }
 
-pub type ArcMeta<C: Comparer> = Arc<Meta<C>>;
+pub type ArcMeta<C> = Arc<Meta<C>>;
 
 #[derive(Clone,Copy)]
 pub struct Match {

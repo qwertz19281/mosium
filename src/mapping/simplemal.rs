@@ -1,5 +1,4 @@
 use super::*;
-use rand::RngCore;
 
 pub struct SimpleMal;
 
